@@ -1,17 +1,12 @@
-const express = require("express");
-const {
-  registerUser,
-  loginUser,
-  refreshAccessToken,
-  getUserProfile,
-} = require("../controllers/userController");
-const { protect } = require("../middleware/authMiddleware");
+import express from "express";
+import { login, signup, verifyEmail } from "../controllers/userController.js";
 
-const router = express.Router();
+const userRouter = express.Router();
 
-router.post("/register", registerUser);
-router.post("/login", loginUser);
-router.post("/refresh", refreshAccessToken);
-router.get("/me", protect, getUserProfile);
+// PUBLIC ROUTES *
+userRouter.post("/sign-up", signup);
+userRouter.post("/log-in", login);
 
-module.exports = router;
+userRouter.get("/verify-email/:verificationToken", verifyEmail);
+
+export default userRouter;

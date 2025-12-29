@@ -1,0 +1,28 @@
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import express from "express";
+import userRouter from "./routes/userRoutes.js";
+import { errorHandler } from "./middleware/error.middleware.js";
+
+const app = express();
+app.set("trust proxy", 1);
+// application level middlewares
+app.use(
+  cors({
+    origin: process.env.NODE_ENV === "production" ? process.env.CLIENT_URL : "http://localhost:5173",
+    credentials: true,
+    methods: ["GET", "POST", "DELETE", "OPTIONS", "PATCH", "PUT"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true, limit: "16kb" }));
+app.use(cookieParser());
+
+// routes (API ENDPOINTS)
+// public
+app.use('/api/v1/auth', userRouter);
+
+app.use(errorHandler);
+
+export default app;

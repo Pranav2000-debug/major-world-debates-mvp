@@ -2,6 +2,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import express from "express";
 import userRouter from "./routes/userRoutes.js";
+import authRouter from "./routes/auth.routes.js";
 import { errorHandler } from "./middleware/error.middleware.js";
 
 const app = express();
@@ -20,8 +21,13 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 
 // routes (API ENDPOINTS)
-// public
-app.use('/api/v1/auth', userRouter);
+
+// AUTH ROUTES (HAS A PROTECTED LOGOUT ROUTE)
+app.use("/api/v1/auth", authRouter);
+
+// PROTECTED USER ROUTES
+app.use("/api/v1/users", userRouter);
+
 
 app.use(errorHandler);
 

@@ -124,7 +124,12 @@ export const login = asyncHandler(async (req, res) => {
     .status(200)
     .cookie("accessToken", accessToken, opts)
     .cookie("refreshToken", refreshToken, opts)
-    .json(new ApiResponse(200, { user: loggedInUser }));
+    .json(new ApiResponse(200, {user: loggedInUser} ,"LOGGED IN", ));
+});
+
+export const getCurrentUser = asyncHandler(async (req, res) => {
+  // req.user is already attached by verifyJwt middleware
+  return res.status(200).json({success: true, user: req.user, message: "user verified"});
 });
 
 export const verifyEmail = asyncHandler(async (req, res) => {
@@ -150,4 +155,40 @@ export const verifyEmail = asyncHandler(async (req, res) => {
   await user.save();
 
   return res.status(200).json(new ApiResponse(200, "Email is verified"));
+});
+
+export const logout = asyncHandler(async (req, res) => {
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        refreshToken: null,
+      },
+    },
+    { new: true }
+  );
+
+  const opts = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  };
+  return res.status(200).clearCookie("accessToken", opts).clearCookie("refreshToken", opts).json(new ApiResponse(200, {}, "Logged out successfully"));
+});
+
+export const checkAvailability = asyncHandler(async (req, res) => {
+  const { username } = req.query;
+
+  if (!username) {
+    throw new ApiError(400, "Username is required");
+  }
+
+  const normalizedUsername = username.trim();
+
+  const usernameExists = await User.findOne({ username: normalizedUsername });
+
+  return res.status(200).json({
+    usernameAvailability: !usernameExists,
+  });
 });

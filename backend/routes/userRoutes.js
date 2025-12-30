@@ -1,12 +1,10 @@
 import express from "express";
-import { login, signup, verifyEmail } from "../controllers/userController.js";
+import { getCurrentUser } from "../controllers/userController.js";
+import {verifyJwt} from "../middleware/authMiddleware.js";
 
 const userRouter = express.Router();
 
-// PUBLIC ROUTES *
-userRouter.post("/sign-up", signup);
-userRouter.post("/log-in", login);
-
-userRouter.get("/verify-email/:verificationToken", verifyEmail);
+userRouter.get("/me", verifyJwt, getCurrentUser);
 
 export default userRouter;
+

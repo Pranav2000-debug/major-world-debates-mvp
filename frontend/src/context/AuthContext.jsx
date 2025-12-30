@@ -1,37 +1,49 @@
-import React, { createContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, useContext, createContext } from "react";
+import axios from "axios";
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const AuthContext = createContext();
+
+const AuthContext = createContext(null);
+
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
-  // Load user from localStorage on mount
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+  const fetchMe = async () => {
+    try {
+      const res = await axios.get("http://localhost:4000/api/v1/users/me", { withCredentials: true });
+      setUser(res?.data?.user);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
-  }, []);
-
-  // Login
-  const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
   };
 
-  // Logout with redirect
-  const logout = () => {
+  // runs ONCE on app load
+  useEffect(() => {
+    fetchMe();
+  }, []);
+
+  const logout = async () => {
+    await axios.post("http://localhost:4000/api/v1/auth/logout", null, { withCredentials: true });
     setUser(null);
-    localStorage.clear();
-    navigate("/login"); // redirect after logout
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        loading,
+        setUser,
+        logout,
+      }}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const useAuth = () => useContext(AuthContext);

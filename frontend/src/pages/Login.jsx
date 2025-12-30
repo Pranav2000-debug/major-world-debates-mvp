@@ -1,48 +1,78 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { toast, Toaster } from "react-hot-toast";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
-  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-
+  const { setUser } = useAuth();
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      setMessage("✅ You are already logged in!");
-    }
-  }, []);
-
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const { email, password } = formData;
+
+    // Frontend sanity checks
+    if (!email.trim() || !password.trim()) {
+      toast.error("Email and password are required.");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+
     try {
-      const res = await axios.post("https://major-world-debates-mvp.onrender.com/api/users/login", formData);
-
-      // Save tokens + user in localStorage
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("refreshToken", res.data.refreshToken);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-
-      // Update global auth context
-      login(res.data.user);
-
-      setMessage("✅ Login successful!");
-      navigate("/"); // redirect to home
-    } catch (err) {
-      console.error(err.response?.data || err.message);
-      setMessage("❌ " + (err.response?.data?.message || "Error logging in"));
+      const res = await axios.post("http://localhost:4000/api/v1/auth/log-in", { email, password }, { withCredentials: true });
+      toast.success("Login successful!");
+      setUser(res?.data?.data?.user);
+      navigate("/"); // Redirect to landing page on successful login
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Login failed. Please check your credentials and try again.");
+      }
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4">
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+        gutter={8}
+        containerClassName=""
+        containerStyle={{}}
+        toasterId="default"
+        toastOptions={{
+          // Define default options
+          className: "",
+          duration: 5000,
+          removeDelay: 1000,
+          style: {
+            background: "#363636",
+            color: "#fff",
+          },
+
+          // Default options for specific types
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: "green",
+              secondary: "black",
+            },
+          },
+        }}
+      />
       <div className="max-w-md w-full bg-gray-800 p-8 rounded-xl shadow-lg">
         <h2 className="text-3xl font-bold text-white text-center mb-6">Login</h2>
 
@@ -73,19 +103,16 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full bg-yellow-400 text-black font-semibold py-2 rounded-lg hover:bg-yellow-300 transition-colors duration-300"
-          >
+            className="w-full bg-yellow-400 text-black font-semibold py-2 rounded-lg hover:bg-yellow-300 transition-colors duration-300">
             Log In
           </button>
         </form>
 
-        {message && <p className="text-center mt-4 text-sm text-gray-300">{message}</p>}
-
         <p className="text-gray-400 text-sm mt-4 text-center">
-          Don’t have an account?{" "}
-          <a href="/register" className="text-yellow-400 hover:text-yellow-300">
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-yellow-400 hover:text-yellow-300">
             Sign Up
-          </a>
+          </Link>
         </p>
       </div>
     </div>

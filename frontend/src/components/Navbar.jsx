@@ -1,10 +1,18 @@
-import React, { useState, useContext } from "react";
-import { Link } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
+  const { isAuthenticated, logout, loading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  if (loading) return null;
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login", { replace: true });
+  };
 
   return (
     <nav className="bg-black shadow-lg p-4 w-full z-50">
@@ -21,24 +29,19 @@ const Navbar = () => {
           <Link to="/about" className="hover:text-yellow-400 transition-colors duration-300">
             About Us
           </Link>
-          <Link className="hover:text-yellow-400 transition-colors duration-300">Debate It</Link>
-          <Link to="/about" className="hover:text-yellow-400 transition-colors duration-300">
-            Leaderboards
-          </Link>
 
-          {user ? (
+          {isAuthenticated ? (
             <>
-              <span className="text-yellow-400">Hi, {user.username}</span>
-              <button
-                onClick={logout}
-                className="hover:text-red-400 transition-colors duration-300"
-              >
+              <Link to="/profile" className="hover:text-yellow-400 transition-colors duration-300">
+                Profile
+              </Link>
+              <button onClick={handleLogout} className="hover:text-red-400 transition-colors duration-300">
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link to="/register" className="hover:text-yellow-400 transition-colors duration-300">
+              <Link to="/signup" className="hover:text-yellow-400 transition-colors duration-300">
                 Sign Up
               </Link>
               <Link to="/login" className="hover:text-yellow-400 transition-colors duration-300">
@@ -74,16 +77,17 @@ const Navbar = () => {
             About Us
           </Link>
 
-          {user ? (
+          {isAuthenticated ? (
             <>
-              <span className="block px-4 py-2 text-yellow-400">Hi, {user.username}</span>
+              <Link to="/profile" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-white hover:bg-gray-800 rounded transition">
+                Profile
+              </Link>
               <button
                 onClick={() => {
-                  logout();
+                  handleLogout();
                   setIsOpen(false);
                 }}
-                className="block w-full text-left px-4 py-2 text-red-400 hover:bg-gray-800 rounded transition"
-              >
+                className="block w-full text-left px-4 py-2 text-red-400 hover:bg-gray-800 rounded transition">
                 Logout
               </button>
             </>

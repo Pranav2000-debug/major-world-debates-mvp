@@ -11,17 +11,31 @@ import Signup from "./pages/SignUp";
 
 import { AuthProvider } from "./context/AuthContext";
 import PublicOnlyRoutes from "./routes/PublicOnlyRoutes";
+import ProtectedRoutes from "./routes/ProtectedRoutes";
+import DashboardLayout from "./components/Dashboard/DashboardLayout";
+import Dashboard from "./pages/Dashboard";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={<Layout />}>
-      <Route index element={<Home />} />
-      <Route element={<PublicOnlyRoutes/>}>
-        <Route path="login" element={<Login />} />
-        <Route path="signup" element={<Signup />} />
+    <>
+      {/* PUBLIC LAYOUT */}
+      <Route element={<Layout />}>
+        <Route index element={<Home />} />
+        <Route path="about" element={<AboutUs />} />
+
+        <Route element={<PublicOnlyRoutes />}>
+          <Route path="login" element={<Login />} />
+          <Route path="signup" element={<Signup />} />
+        </Route>
       </Route>
-      <Route path="about" element={<AboutUs />} />
-    </Route>
+
+      {/* DASHBOARD (NO NAVBAR) */}
+      <Route element={<ProtectedRoutes />}>
+        <Route path="dashboard" element={<DashboardLayout />}>
+          <Route index element={<Dashboard />} />
+        </Route>
+      </Route>
+    </>
   )
 );
 

@@ -10,13 +10,16 @@ import Login from "./pages/Login";
 import Signup from "./pages/SignUp";
 
 import { AuthProvider } from "./context/AuthContext";
+import PublicOnlyRoutes from "./routes/PublicOnlyRoutes";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
       <Route index element={<Home />} />
-      <Route path="login" element={<Login />} />
-      <Route path="signup" element={<Signup />} />
+      <Route element={<PublicOnlyRoutes/>}>
+        <Route path="login" element={<Login />} />
+        <Route path="signup" element={<Signup />} />
+      </Route>
       <Route path="about" element={<AboutUs />} />
     </Route>
   )

@@ -1,11 +1,27 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+
 
 const Navbar = () => {
   const { isAuthenticated, logout, loading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const getLinkClass = (path) => {
+    const isActive = location.pathname === path;
+    return `px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ${
+      isActive ? "bg-yellow-400 text-black" : "text-white hover:bg-gray-700"
+    }`;
+  };
+
+  const getMobileLinkClass = (path) => {
+    const isActive = location.pathname === path;
+    return `block px-4 py-2 rounded transition ${
+      isActive ? "bg-yellow-400 text-black" : "text-white hover:bg-gray-800"
+    }`;
+  };
 
   if (loading) return null;
 
@@ -14,39 +30,49 @@ const Navbar = () => {
     navigate("/login", { replace: true });
   };
 
+  const handleMobileLinkClick = (callback) => {
+    setIsOpen(false);
+    if (callback) {
+      callback();
+    }
+  };
+
   return (
     <nav className="bg-black shadow-lg p-4 w-full z-50">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <Link to="/" className="text-2xl font-extrabold text-white tracking-wide">
+        <NavLink to="/" className="text-2xl font-extrabold text-white tracking-wide">
           MWD.ai
-        </Link>
+        </NavLink>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex space-x-8 text-white font-semibold">
-          <Link to="/" className="hover:text-yellow-400 transition-colors duration-300">
+        <div className="hidden md:flex items-center space-x-4 text-white font-semibold">
+          <NavLink to="/" className={getLinkClass("/")}>
             Home
-          </Link>
-          <Link to="/about" className="hover:text-yellow-400 transition-colors duration-300">
+          </NavLink>
+          <NavLink to="/about" className={getLinkClass("/about")}>
             About Us
-          </Link>
+          </NavLink>
 
           {isAuthenticated ? (
             <>
-              <Link to="/profile" className="hover:text-yellow-400 transition-colors duration-300">
+              <NavLink to="/profile" className={getLinkClass("/profile")}>
                 Profile
-              </Link>
-              <button onClick={handleLogout} className="hover:text-red-400 transition-colors duration-300">
+              </NavLink>
+              <button
+                onClick={handleLogout}
+                className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 transition-all duration-300"
+              >
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link to="/signup" className="hover:text-yellow-400 transition-colors duration-300">
+              <NavLink to="/signup" className={getLinkClass("/signup")}>
                 Sign Up
-              </Link>
-              <Link to="/login" className="hover:text-yellow-400 transition-colors duration-300">
+              </NavLink>
+              <NavLink to="/login" className={getLinkClass("/login")}>
                 Login
-              </Link>
+              </NavLink>
             </>
           )}
         </div>
@@ -70,35 +96,55 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden mt-2 space-y-2 bg-black shadow-lg rounded-lg p-2">
-          <Link to="/" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-white hover:bg-gray-800 rounded transition">
+          <NavLink
+            to="/"
+            onClick={() => handleMobileLinkClick()}
+            className={getMobileLinkClass("/")}
+          >
             Home
-          </Link>
-          <Link to="/about" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-white hover:bg-gray-800 rounded transition">
+          </NavLink>
+          <NavLink
+            to="/about"
+            onClick={() => handleMobileLinkClick()}
+            className={getMobileLinkClass("/about")}
+          >
             About Us
-          </Link>
+          </NavLink>
 
           {isAuthenticated ? (
             <>
-              <Link to="/profile" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-white hover:bg-gray-800 rounded transition">
+              <NavLink
+                to="/profile"
+                onClick={() => handleMobileLinkClick()}
+                className={getMobileLinkClass("/profile")}
+              >
                 Profile
-              </Link>
+              </NavLink>
               <button
                 onClick={() => {
-                  handleLogout();
-                  setIsOpen(false);
+                  handleMobileLinkClick(handleLogout);
                 }}
-                className="block w-full text-left px-4 py-2 text-red-400 hover:bg-gray-800 rounded transition">
+                className="block w-full text-left px-4 py-2 text-red-400 hover:bg-gray-800 rounded transition"
+              >
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link to="/register" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-white hover:bg-gray-800 rounded transition">
+              <NavLink
+                to="/signup"
+                onClick={() => handleMobileLinkClick()}
+                className={getMobileLinkClass("/signup")}
+              >
                 Sign Up
-              </Link>
-              <Link to="/login" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-white hover:bg-gray-800 rounded transition">
+              </NavLink>
+              <NavLink
+                to="/login"
+                onClick={() => handleMobileLinkClick()}
+                className={getMobileLinkClass("/login")}
+              >
                 Login
-              </Link>
+              </NavLink>
             </>
           )}
         </div>

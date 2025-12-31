@@ -2,6 +2,7 @@ import { ApiError } from "../utils/utilBarrel.js";
 
 export const errorHandler = (err, req, res, next) => {
   // default values
+  // console.log(err) -> this is the ApiError object that is an instance of Error
   let statusCode = err.statusCode || 500;
   let message = err.message || "Internal Server Error";
 
@@ -15,6 +16,7 @@ export const errorHandler = (err, req, res, next) => {
   console.error("ERROR!!", {
     message: err.message,
     stack: err.stack,
+    code: statusCode,
   });
 
   res.status(statusCode).json({

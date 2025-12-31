@@ -1,6 +1,5 @@
 import { User } from "../models/User.js";
 import { asyncHandler, ApiError, ApiResponse } from "../utils/utilBarrel.js";
-import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { sendEmail } from "../mail/mailgen.js";
 import { isValidEmail, isValidPassword } from "../regex/regexRules.js";
@@ -28,6 +27,9 @@ export const signup = asyncHandler(async (req, res) => {
   if ([fullname, username, email, password].some((field) => !field || field?.trim() === "")) {
     throw new ApiError(400, "All fields are required to be filled.");
   }
+  if (typeof fullname !== "string" || typeof email !== "string" || typeof password !== "string" || typeof username !== "string") {
+    throw new ApiError(400, "Invalid input type");
+  }
 
   if (!isValidEmail(email)) {
     throw new ApiError(400, "Invalid email format");
@@ -37,7 +39,8 @@ export const signup = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Password must be at least 8 characters long and include uppercase, lowercase, and a special character");
   }
 
-  if (await User.findOne({ $or: [{ email }, { username }] })) throw new ApiError(409, "User with email or username already exists!");
+  if (await User.findOne({ $or: [{ email: email.toLocaleLowerCase().trim() }, { username: username.toLocaleLowerCase().trim() }] }))
+    throw new ApiError(409, "User with email or username already exists!");
 
   const user = await User.create({
     username: username.toLowerCase(),
@@ -78,8 +81,11 @@ export const login = asyncHandler(async (req, res) => {
   if ([email, password].some((field) => !field || field?.trim() === "")) {
     throw new ApiError(400, "All fields are required to be filled.");
   }
-  const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
-  if (!user) throw new ApiError(400, "User does not exist");
+  if (typeof email !== "string" || typeof password !== "string") {
+    throw new ApiError(400, "Invalid input type");
+  }
+  const user = await User.findOne({ email: email.toLowerCase().trim() }).select("+password");
+  if (!user) throw new ApiError(400, "Invalid email or user does not exist.");
 
   const isPasswordCorrect = await user.matchPassword(password);
   if (!isPasswordCorrect) throw new ApiError(401, "Invalid credentials");
@@ -93,6 +99,7 @@ export const login = asyncHandler(async (req, res) => {
     // token missing or expired → regenerate
     const { unHashedToken, hashedToken, tokenExpiry } = user.generateTemporaryToken();
 
+    // update tokens and resend email
     user.emailVerificationToken = hashedToken;
     user.emailVerificationExpiry = tokenExpiry;
     await user.save();
@@ -124,12 +131,12 @@ export const login = asyncHandler(async (req, res) => {
     .status(200)
     .cookie("accessToken", accessToken, opts)
     .cookie("refreshToken", refreshToken, opts)
-    .json(new ApiResponse(200, {user: loggedInUser} ,"LOGGED IN", ));
+    .json(new ApiResponse(200, { user: loggedInUser }, "LOGGED IN"));
 });
 
 export const getCurrentUser = asyncHandler(async (req, res) => {
   // req.user is already attached by verifyJwt middleware
-  return res.status(200).json({success: true, user: req.user, message: "user verified"});
+  return res.status(200).json({ success: true, user: req.user, message: "user verified" });
 });
 
 export const verifyEmail = asyncHandler(async (req, res) => {
@@ -137,6 +144,9 @@ export const verifyEmail = asyncHandler(async (req, res) => {
 
   if (!verificationToken) {
     throw new ApiError(400, "email verification token is missing");
+  }
+  if (typeof verificationToken !== "string") {
+    throw new ApiError(400, "Invalid token format");
   }
 
   let hashedToken = crypto.createHash("sha256").update(verificationToken).digest("hex");
@@ -179,7 +189,9 @@ export const logout = asyncHandler(async (req, res) => {
 
 export const checkAvailability = asyncHandler(async (req, res) => {
   const { username } = req.query;
-
+  if(typeof username !== "string") {
+    throw new ApiError(400, "Invalid username type");
+  }
   if (!username) {
     throw new ApiError(400, "Username is required");
   }

@@ -19,7 +19,9 @@ export const uploadPdfToCloudinary = async (pdfFileBuffer) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: "mwd-files",
-          resource_type: "raw",
+          resource_type: "image",
+          use_filename: true,
+          unique_filename: true,
         },
         (error, uploadResult) => {
           if (error) return rej(error);
@@ -31,7 +33,7 @@ export const uploadPdfToCloudinary = async (pdfFileBuffer) => {
     return cloudinaryResult;
   } catch (error) {
     console.log("uploading image failed", error);
-    return res.status(500).json({ message: "failed to upload image" }, { status: 500 });
+    throw error;
   }
 };
 

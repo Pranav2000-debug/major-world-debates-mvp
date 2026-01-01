@@ -5,6 +5,7 @@ import userRouter from "./routes/userRoutes.js";
 import authRouter from "./routes/auth.routes.js";
 import { errorHandler } from "./middleware/error.middleware.js";
 import { globalLimiter } from "./middleware/rateLimiter.js";
+import uploadRouter from "./routes/upload.route.js";
 
 const app = express();
 app.set("trust proxy", 1);
@@ -30,6 +31,7 @@ app.use("/api/v1/auth", authRouter);
 
 // PROTECTED USER ROUTES
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/uploads", uploadRouter);
 
 app.use(errorHandler);
 

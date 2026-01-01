@@ -19,8 +19,8 @@ function AiSummary() {
     };
     fetchPdf();
   }, [id]);
-
-  const ai = singlePdf?.aiResult;
+  const gate = singlePdf?.aiResult?.gate;
+  const analysis = singlePdf?.aiResult?.analysis;
   return (
     <div className="space-y-8">
       {/* ===== PDF SECTION ===== */}
@@ -39,68 +39,83 @@ function AiSummary() {
         </div>
       </section>
 
+      {/* non a debate */}
+      {gate && gate.isDebate === false && (
+        <section className="rounded-lg border border-yellow-500 bg-yellow-500/10 p-4">
+          <h2 className="text-lg font-semibold mb-2 text-yellow-400">Not Suitable for Debate</h2>
+
+          <p className="text-sm text-gray-300">{gate.reason}</p>
+
+          <p className="mt-2 text-xs text-gray-400">Confidence: {(gate.confidence * 100).toFixed(0)}%</p>
+        </section>
+      )}
+
       {/* ===== AI COUNTER DEBATE ===== */}
-      <section className="rounded-lg border border-gray-700 bg-gray-800 p-4">
-        <h2 className="text-lg font-semibold mb-2">AI Counter Debate</h2>
+      {gate?.isDebate && analysis && (
+        <>
+          <section className="rounded-lg border border-gray-700 bg-gray-800 p-4">
+            <h2 className="text-lg font-semibold mb-2">AI Counter Debate</h2>
 
-        <p className="text-sm text-gray-300 leading-relaxed">
-          {ai?.counterDebate || "NO AI COUNTER DEBATE GENERATED"}
-          <br />
-          This section represents the opposing stance in the debate.
-        </p>
-      </section>
+            <p className="text-sm text-gray-300 leading-relaxed">
+              {analysis?.counterDebate || "NO AI COUNTER DEBATE GENERATED"}
+              <br />
+              This section represents the opposing stance in the debate.
+            </p>
+          </section>
 
-      {/* ===== AI ANALYSIS & FEEDBACK ===== */}
-      <section className="rounded-lg border border-gray-700 bg-gray-800 p-4">
-        <h2 className="text-lg font-semibold mb-4">AI Analysis</h2>
+          {/* ===== AI ANALYSIS & FEEDBACK ===== */}
+          <section className="rounded-lg border border-gray-700 bg-gray-800 p-4">
+            <h2 className="text-lg font-semibold mb-4">AI Analysis</h2>
 
-        <div className="space-y-3 text-sm text-gray-300">
-          <div>
-            <strong className="text-white">Strengths:</strong>
-            <ul className="list-disc list-inside mt-1">
-              {ai?.strengths?.length ? ai.strengths.map((s, i) => <li key={i}>{s}</li>) : <li className="opacity-60">No data</li>}
-            </ul>
-          </div>
+            <div className="space-y-3 text-sm text-gray-300">
+              <div>
+                <strong className="text-white">Strengths:</strong>
+                <ul className="list-disc list-inside mt-1">
+                  {analysis?.strengths?.length ? analysis.strengths.map((s, i) => <li key={i}>{s}</li>) : <li className="opacity-60">No data</li>}
+                </ul>
+              </div>
 
-          <div>
-            <strong className="text-white">Weaknesses:</strong>
-            <ul className="list-disc list-inside mt-1">
-              {ai?.weaknesses?.length ? ai.weaknesses.map((w, i) => <li key={i}>{w}</li>) : <li className="opacity-60">No data</li>}
-            </ul>
-          </div>
+              <div>
+                <strong className="text-white">Weaknesses:</strong>
+                <ul className="list-disc list-inside mt-1">
+                  {analysis?.weaknesses?.length ? analysis.weaknesses.map((w, i) => <li key={i}>{w}</li>) : <li className="opacity-60">No data</li>}
+                </ul>
+              </div>
 
-          <div>
-            <strong className="text-white">Grammar & Clarity:</strong>
-            <ul className="list-disc list-inside mt-1">
-              {ai?.grammarNotes?.length ? ai.grammarNotes.map((g, i) => <li key={i}>{g}</li>) : <li className="opacity-60">No data</li>}
-            </ul>
-          </div>
+              <div>
+                <strong className="text-white">Grammar & Clarity:</strong>
+                <ul className="list-disc list-inside mt-1">
+                  {analysis?.grammarNotes?.length ? analysis.grammarNotes.map((g, i) => <li key={i}>{g}</li>) : <li className="opacity-60">No data</li>}
+                </ul>
+              </div>
 
-          <div>
-            <strong className="text-white">Overall Rating:</strong>
-            <p className="mt-1">{ai?.rating ? `${ai.rating} / 10` : "Not rated"}</p>
-          </div>
-        </div>
-      </section>
-      {/* ===== RELEVANT RESOURCES ===== */}
-      <section className="rounded-lg border border-gray-700 bg-gray-800 p-4">
-        <h2 className="text-lg font-semibold mb-2">Relevant Resources</h2>
+              <div>
+                <strong className="text-white">Overall Rating:</strong>
+                <p className="mt-1">{analysis?.rating ? `${analysis.rating} / 10` : "Not rated"}</p>
+              </div>
+            </div>
+          </section>
+          {/* ===== RELEVANT RESOURCES ===== */}
+          <section className="rounded-lg border border-gray-700 bg-gray-800 p-4">
+            <h2 className="text-lg font-semibold mb-2">Relevant Resources</h2>
 
-        {ai?.resources?.length ? (
-          <ul className="space-y-2 text-sm text-gray-300">
-            {ai.resources.map((r, i) => (
-              <li key={i}>
-                •{" "}
-                <a href={r.url} target="_blank" rel="noreferrer" className="text-yellow-400 hover:underline">
-                  {r.title}
-                </a>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-gray-400">No resources suggested yet.</p>
-        )}
-      </section>
+            {analysis?.resources?.length ? (
+              <ul className="space-y-2 text-sm text-gray-300">
+                {analysis.resources.map((r, i) => (
+                  <li key={i}>
+                    •{" "}
+                    <a href={r.url} target="_blank" rel="noreferrer" className="text-yellow-400 hover:underline">
+                      {r.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-gray-400">No resources suggested yet.</p>
+            )}
+          </section>
+        </>
+      )}
     </div>
   );
 }

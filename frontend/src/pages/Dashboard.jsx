@@ -70,11 +70,17 @@ function Dashboard() {
 
   // temporary state change
   const handleSubmitToAI = async (pdfId) => {
+    // later change to background jobs and polls or use websocket
+    // optimistic setting for now. no race conditions.
+    setPdfs((prev) => prev.map((p) => (p._id === pdfId ? { ...p, status: "processing" } : p)));
     try {
       const AIRes = await axios.post(`http://localhost:4000/api/v1/pdfs/${pdfId}/submit`, {}, { withCredentials: true });
       const updatedPdf = AIRes?.data?.data?.pdf;
       setPdfs((prev) => prev.map((p) => (p._id === updatedPdf._id ? updatedPdf : p)));
     } catch (error) {
+      // rollback on error
+      setPdfs((prev) => prev.map((p) => (p._id === pdfId ? { ...p, status: "failed" } : p)));
+      toast.error(error.message)
       handleApiError(error);
     }
   };

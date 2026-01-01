@@ -50,7 +50,7 @@ export default function PdfCard({ pdf, onSubmit, onDelete, onDetails }) {
 
         <p className="text-xs text-neutral-400">{(pdf.size / 1024 / 1024).toFixed(2)} MB</p>
 
-        <p className="text-xs text-neutral-500">Created on: {createdDate.toDateString()}</p>
+        <p className="text-xs text-neutral-500">Created on: {createdDate.toLocaleString("en-GB")}</p>
 
         {/* STATUS LABEL (NON-INTRUSIVE) */}
         {pdf.status === "failed" && <p className="text-xs text-red-400 mt-1">AI processing failed</p>}

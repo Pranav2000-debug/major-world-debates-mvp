@@ -39,6 +39,7 @@ const Login = () => {
       const res = await axios.post("http://localhost:4000/api/v1/auth/log-in", { email, password }, { withCredentials: true });
       toast.success("Login successful!");
       setUser(res?.data?.data?.user);
+      await new Promise((r) => setTimeout(r, 800));
       navigate("/"); // Redirect to landing page on successful login
     } catch (error) {
       handleApiError(error);

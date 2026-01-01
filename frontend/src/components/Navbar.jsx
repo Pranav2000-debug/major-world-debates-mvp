@@ -2,7 +2,6 @@ import { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-
 const Navbar = () => {
   const { isAuthenticated, logout, loading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -18,9 +17,7 @@ const Navbar = () => {
 
   const getMobileLinkClass = (path) => {
     const isActive = location.pathname === path;
-    return `block px-4 py-2 rounded transition ${
-      isActive ? "bg-yellow-400 text-black" : "text-white hover:bg-gray-800"
-    }`;
+    return `block px-4 py-2 rounded transition ${isActive ? "bg-yellow-400 text-black" : "text-white hover:bg-gray-800"}`;
   };
 
   if (loading) return null;
@@ -55,13 +52,12 @@ const Navbar = () => {
 
           {isAuthenticated ? (
             <>
-              <NavLink to="/profile" className={getLinkClass("/profile")}>
-                Profile
+              <NavLink to="/dashboard" className={getLinkClass("/profile")}>
+                Dashboard
               </NavLink>
               <button
                 onClick={handleLogout}
-                className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 transition-all duration-300"
-              >
+                className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-700 transition-all duration-300">
                 Logout
               </button>
             </>
@@ -96,53 +92,32 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden mt-2 space-y-2 bg-black shadow-lg rounded-lg p-2">
-          <NavLink
-            to="/"
-            onClick={() => handleMobileLinkClick()}
-            className={getMobileLinkClass("/")}
-          >
+          <NavLink to="/" onClick={() => handleMobileLinkClick()} className={getMobileLinkClass("/")}>
             Home
           </NavLink>
-          <NavLink
-            to="/about"
-            onClick={() => handleMobileLinkClick()}
-            className={getMobileLinkClass("/about")}
-          >
+          <NavLink to="/about" onClick={() => handleMobileLinkClick()} className={getMobileLinkClass("/about")}>
             About Us
           </NavLink>
 
           {isAuthenticated ? (
             <>
-              <NavLink
-                to="/profile"
-                onClick={() => handleMobileLinkClick()}
-                className={getMobileLinkClass("/profile")}
-              >
-                Profile
+              <NavLink to="/dashboard" onClick={() => handleMobileLinkClick()} className={getMobileLinkClass("/profile")}>
+                dashboard
               </NavLink>
               <button
                 onClick={() => {
                   handleMobileLinkClick(handleLogout);
                 }}
-                className="block w-full text-left px-4 py-2 text-red-400 hover:bg-gray-800 rounded transition"
-              >
+                className="block w-full text-left px-4 py-2 text-red-400 hover:bg-gray-800 rounded transition">
                 Logout
               </button>
             </>
           ) : (
             <>
-              <NavLink
-                to="/signup"
-                onClick={() => handleMobileLinkClick()}
-                className={getMobileLinkClass("/signup")}
-              >
+              <NavLink to="/signup" onClick={() => handleMobileLinkClick()} className={getMobileLinkClass("/signup")}>
                 Sign Up
               </NavLink>
-              <NavLink
-                to="/login"
-                onClick={() => handleMobileLinkClick()}
-                className={getMobileLinkClass("/login")}
-              >
+              <NavLink to="/login" onClick={() => handleMobileLinkClick()} className={getMobileLinkClass("/login")}>
                 Login
               </NavLink>
             </>

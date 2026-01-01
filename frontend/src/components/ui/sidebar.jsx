@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react-refresh/only-export-components */
 "use client";
 import { cn } from "@/lib/utils";
 import React, { useState, createContext, useContext } from "react";
@@ -33,7 +35,7 @@ export const Sidebar = ({ children, open, setOpen, animate }) => {
 
 export const SidebarBody = (props) => {
   return (
-    <div className="md:flex md:flex-col h-full">
+    <div className="md:flex md:flex-col">
       <DesktopSidebar {...props} />
       <MobileSidebar {...props} />
     </div>

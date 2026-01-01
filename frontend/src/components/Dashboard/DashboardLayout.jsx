@@ -1,6 +1,7 @@
 import { Sidebar, SidebarBody, SidebarLink, useSidebar } from "@/components/ui/sidebar";
-import { IconUpload, IconUser, IconLogout } from "@tabler/icons-react";
-
+import { IconUpload, IconUser, IconLogout, IconHome } from "@tabler/icons-react";
+import { Outlet } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 /* ---------- Sidebar Pieces ---------- */
 
 function SidebarHeader() {
@@ -16,9 +17,10 @@ function SidebarHeader() {
 
 function LogoutButton() {
   const { open } = useSidebar();
+  const { logout } = useAuth();
 
   return (
-    <button className="flex items-center gap-2 h-10 text-sm text-red-500 hover:bg-gray-800 rounded">
+    <button onClick={logout} className="flex items-center gap-2 h-10 text-sm text-red-500 hover:bg-gray-800 rounded">
       <IconLogout size={22} className="shrink-0" />
       {open && <span>Logout</span>}
     </button>
@@ -41,8 +43,16 @@ export default function DashboardLayout() {
               <SidebarLink
                 link={{
                   label: "Uploads",
-                  href: "#",
+                  href: "$",
                   icon: <IconUpload className="text-white shrink-0" />,
+                }}
+                className="h-10 rounded hover:bg-gray-800 [&_span]:text-white"
+              />
+               <SidebarLink
+                link={{
+                  label: "Home",
+                  href: "/",
+                  icon: <IconHome className="text-white shrink-0" />,
                 }}
                 className="h-10 rounded hover:bg-gray-800 [&_span]:text-white"
               />
@@ -64,7 +74,16 @@ export default function DashboardLayout() {
       </Sidebar>
 
       {/* Placeholder main area (empty for now) */}
-      <div className="flex-1 bg-gray-900 hidden md:block" />
+      <main
+        className="
+          flex-1
+          overflow-y-auto
+          bg-gray-900
+          p-6
+          pt-16 md:pt-6
+        ">
+        <Outlet />
+      </main>
     </div>
   );
 }

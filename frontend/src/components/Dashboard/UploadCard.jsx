@@ -1,3 +1,5 @@
+import { LoaderFive } from "@/components/ui/loader";
+
 export default function UploadCard({ onClick, disabled = false }) {
   return (
     <div
@@ -17,7 +19,7 @@ export default function UploadCard({ onClick, disabled = false }) {
       ">
       <div className="flex flex-col items-center gap-2 text-neutral-400 group-hover:text-yellow-400 transition">
         <span className="text-4xl">+</span>
-        <span className="text-sm">{disabled ? "Uploading…" : "Upload PDF"}</span>
+        <span className="text-sm">{disabled ? <LoaderFive text="uploading" /> : "Upload PDF"}</span>
       </div>
     </div>
   );

@@ -33,7 +33,7 @@ app.use("/api/v1/auth", authRouter);
 // PROTECTED USER ROUTES
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/uploads", uploadRouter); // for uploading/deleting to/from cloud and db
-app.use("/api/v1/pdfs", pdfRouter); // get pdfs controller
+app.use("/api/v1/pdfs", pdfRouter); 
 
 app.use(errorHandler);
 

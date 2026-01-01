@@ -12,7 +12,8 @@ export function useMyPdfs() {
         const res = await axios.get("http://localhost:4000/api/v1/pdfs", {
           withCredentials: true,
         });
-
+        // spoof loader
+        await new Promise((r) => setTimeout(r, 1000));
         setPdfs(res?.data?.data?.pdfs || []);
       } catch (err) {
         handleApiError(err);

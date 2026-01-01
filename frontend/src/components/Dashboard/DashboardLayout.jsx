@@ -43,7 +43,7 @@ export default function DashboardLayout() {
               <SidebarLink
                 link={{
                   label: "Uploads",
-                  href: "$",
+                  href: "/dashboard",
                   icon: <IconUpload className="text-white shrink-0" />,
                 }}
                 className="h-10 rounded hover:bg-gray-800 [&_span]:text-white"

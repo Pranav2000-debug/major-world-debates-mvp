@@ -2,11 +2,16 @@ import { uploadPdfToCloudinary } from "../cloudinary/cloudinary.js";
 import { Pdf } from "../models/pdf.model.js";
 import { ApiError, ApiResponse, asyncHandler } from "../utils/utilBarrel.js";
 import { v2 as cloudinary } from "cloudinary";
+import { extractPdfText } from "../utils/extractPdfText.js";
 
 // this controller for route /pdf uploads to cloud and DB
 export const uploadPdfController = asyncHandler(async (req, res) => {
   if (!req.file) throw new ApiError(400, "No PDF uploaded");
 
+  const extractedText = await extractPdfText(req.file.buffer);
+  if (!extractedText.trim()) {
+    throw new ApiError(400, "No readable text found in PDF (possibly scanned)");
+  }
   const cloudinaryResult = await uploadPdfToCloudinary(req.file.buffer, req.file.originalname);
 
   if (!cloudinaryResult) throw new ApiError(500, "Failed to upload PDF, retry");
@@ -22,6 +27,8 @@ export const uploadPdfController = asyncHandler(async (req, res) => {
     }),
     originalName: cloudinaryResult.original_filename,
     size: cloudinaryResult.bytes,
+    extractedText: extractedText,
+    status: "uploaded",
   };
 
   // DB UPLOAD ERROR, DELETE FROM CLOUD

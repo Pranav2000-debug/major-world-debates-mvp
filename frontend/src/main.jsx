@@ -14,6 +14,7 @@ import PublicOnlyRoutes from "./routes/PublicOnlyRoutes";
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 import DashboardLayout from "./components/Dashboard/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
+import AiSummary from "./pages/AiSummary";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -33,6 +34,7 @@ const router = createBrowserRouter(
       <Route element={<ProtectedRoutes />}>
         <Route path="dashboard" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />
+          <Route path="pdf/:id" element={<AiSummary/>}></Route>
         </Route>
       </Route>
     </>

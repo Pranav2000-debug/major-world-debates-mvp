@@ -5,12 +5,16 @@ import PdfCard from "../components/Dashboard/PdfCard";
 import { handleApiError } from "@/utils/handleApiError";
 import { Toaster, toast } from "react-hot-toast";
 import { useMyPdfs } from "../hooks/useMyPdfs";
+import { useNavigate } from "react-router-dom";
+import { LoaderFive } from "@/components/ui/loader";
 
 function Dashboard() {
   const fileInputRef = useRef(null);
-  const { pdfs, setPdfs } = useMyPdfs();
+  const { pdfs, setPdfs, loading } = useMyPdfs();
   const [uploading, setUploading] = useState(false);
+  const navigate = useNavigate();
 
+  // dev-frontend-log
   console.log(pdfs);
   const handleCardClick = () => {
     if (!uploading) fileInputRef.current?.click();
@@ -19,14 +23,12 @@ function Dashboard() {
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     // Frontend guards
     if (file.type !== "application/pdf") {
       toast.error("Only PDF files are allowed");
       e.target.value = "";
       return;
     }
-
     if (file.size > 10 * 1024 * 1024) {
       toast.error("File size must be under 10MB");
       e.target.value = "";
@@ -35,15 +37,11 @@ function Dashboard() {
 
     try {
       setUploading(true);
-
       const formData = new FormData();
       formData.append("file", file);
-
       const res = await axios.post("http://localhost:4000/api/v1/uploads/pdf", formData, { withCredentials: true });
-
       const uploadData = res?.data?.data?.pdf;
       if (!uploadData) throw new Error("Invalid upload response");
-
       setPdfs((prev) => [...prev, uploadData]);
       toast.success("PDF uploaded successfully");
     } catch (err) {
@@ -70,9 +68,59 @@ function Dashboard() {
     }
   };
 
+  // temporary state change
+  const handleSubmitToAI = async (pdfId) => {
+    try {
+      const AIRes = await axios.post(`http://localhost:4000/api/v1/pdfs/${pdfId}/submit`, {}, { withCredentials: true });
+      const updatedPdf = AIRes?.data?.data?.pdf;
+      setPdfs((prev) => prev.map((p) => (p._id === updatedPdf._id ? updatedPdf : p)));
+    } catch (error) {
+      handleApiError(error);
+    }
+  };
+
+  const handleGoToDetails = (pdfId) => {
+    navigate(`/dashboard/pdf/${pdfId}`);
+  };
+
   return (
     <div className="space-y-6">
-      <Toaster />
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+        gutter={8}
+        containerClassName=""
+        containerStyle={{}}
+        toasterId="default"
+        toastOptions={{
+          className: "",
+          duration: 5000,
+          removeDelay: 1000,
+          style: {
+            background: "#363636",
+            color: "#FBBF24",
+          },
+          success: {
+            duration: 3000,
+            style: {
+              color: "#FBBF24",
+            },
+            iconTheme: {
+              primary: "#16A34A",
+              secondary: "#363636",
+            },
+          },
+          error: {
+            style: {
+              color: "#FBBF24",
+            },
+            iconTheme: {
+              primary: "#DC2626",
+              secondary: "#363636",
+            },
+          },
+        }}
+      />
 
       <div>
         <h1 className="text-2xl font-semibold text-white">Uploads</h1>
@@ -83,12 +131,24 @@ function Dashboard() {
       <input ref={fileInputRef} type="file" accept="application/pdf" className="hidden" onChange={handleFileChange} />
 
       {/* Cards grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <UploadCard onClick={handleCardClick} disabled={uploading} />
-        {pdfs.map((pdf) => (
-          <PdfCard key={pdf.publicId} pdf={pdf} onSubmit={() => console.log("Submit to AI")} onDelete={() => handleDeletePdf(pdf.publicId)} />
-        ))}
-      </div>
+      {loading ? (
+        <div className="flex items-center justify-center h-[60vh]">
+          <LoaderFive text="Loading..." />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <UploadCard onClick={handleCardClick} disabled={uploading} />
+          {pdfs.map((pdf) => (
+            <PdfCard
+              key={pdf.publicId}
+              pdf={pdf}
+              onSubmit={() => handleSubmitToAI(pdf._id)}
+              onDelete={() => handleDeletePdf(pdf.publicId)}
+              onDetails={() => handleGoToDetails(pdf._id)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -43,7 +43,11 @@ const pdfSchema = new mongoose.Schema(
       enum: ["uploaded", "processing", "completed", "failed"],
       default: "uploaded",
     },
-
+    extractedText: {
+      type: String,
+      default: null,
+      select: false,
+    },
     // AI output (future)
     aiResult: {
       type: mongoose.Schema.Types.Mixed,

@@ -3,7 +3,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
-  const { isAuthenticated, logout, loading } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,8 +19,6 @@ const Navbar = () => {
     const isActive = location.pathname === path;
     return `block px-4 py-2 rounded transition ${isActive ? "bg-yellow-400 text-black" : "text-white hover:bg-gray-800"}`;
   };
-
-  if (loading) return null;
 
   const handleLogout = async () => {
     await logout();

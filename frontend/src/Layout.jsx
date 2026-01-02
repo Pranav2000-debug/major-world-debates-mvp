@@ -1,20 +1,33 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import { useAuth } from "./context/AuthContext";
+import { LoaderTwo } from "./components/ui/loader";
 
-const Layout = () => (
-  <div className="flex flex-col min-h-screen bg-gray-900 text-white">
-    {/* Navbar */}
-    <Navbar />
+const Layout = () => {
+  const { loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">
+        <LoaderTwo />
+      </div>
+    );
+  }
 
-    {/* Main content */}
-    <main className="flex-grow">
-      <Outlet />
-    </main>
+  return (
+    <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+      {/* Navbar */}
+      <Navbar />
 
-    {/* Footer */}
-    <Footer />
-  </div>
-);
+      {/* Main content */}
+      <main className="flex-grow">
+        <Outlet />
+      </main>
+
+      {/* Footer */}
+      <Footer />
+    </div>
+  );
+};
 
 export default Layout;

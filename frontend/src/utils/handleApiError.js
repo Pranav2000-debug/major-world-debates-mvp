@@ -9,7 +9,6 @@ export function handleApiError(err) {
   const status = err?.response?.status;
   const message = err?.response?.data?.message || "Something went wrong. Please try again.";
 
-  console.log(err);
 
   // rate limiting error
   if (status === 429) {

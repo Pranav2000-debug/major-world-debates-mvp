@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import AboutUs from "./pages/AboutUs";
 import Login from "./pages/Login";
 import Signup from "./pages/SignUp";
+import ResetPassword from "./pages/ResetPassword";
 
 import { AuthProvider } from "./context/AuthContext";
 import PublicOnlyRoutes from "./routes/PublicOnlyRoutes";
@@ -23,6 +24,7 @@ const router = createBrowserRouter(
       <Route element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="about" element={<AboutUs />} />
+        <Route path="reset-password/:resetPasswordToken" element={<ResetPassword />} />
 
         <Route element={<PublicOnlyRoutes />}>
           <Route path="login" element={<Login />} />

@@ -38,7 +38,7 @@ export const usernameCheckLimiter = rateLimit({
  */
 export const loginLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 8, // PROD-safe (not too strict)
+  max: 10, // PROD-safe
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -68,7 +68,20 @@ export const signupLimiter = rateLimit({
  */
 export const verifyEmailLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 30,
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
+});
+
+export const forgotPasswordLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 3,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(200).json({
+      success: true,
+      message: "If a user with that email exists, a reset password mail has been sent",
+    });
+  },
 });

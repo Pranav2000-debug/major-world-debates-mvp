@@ -3,7 +3,7 @@ import { asyncHandler, ApiError, ApiResponse } from "../utils/utilBarrel.js";
 import crypto from "crypto";
 import { sendEmail } from "../mail/mailgen.js";
 import { isValidEmail, isValidPassword } from "../regex/regexRules.js";
-import { emailVerificationMailgenContent } from "../mail/mailgencontent.js";
+import { emailVerificationMailgenContent, forgotPasswordMailgenContent } from "../mail/mailgencontent.js";
 
 // util func
 const generateAccessAndRefreshToken = async (userId) => {
@@ -66,7 +66,7 @@ export const signup = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     await User.findByIdAndDelete(user._id);
-    throw new ApiError(500, "Failed to send register user and send mail, please retry.");
+    throw new ApiError(500, "Failed to register user and send mail, please retry.");
   }
 
   const createdUser = await User.findById(user._id).select("-refreshToken -fullname -emailVerificationExpiry -emailVerificationToken");
@@ -189,7 +189,7 @@ export const logout = asyncHandler(async (req, res) => {
 
 export const checkAvailability = asyncHandler(async (req, res) => {
   const { username } = req.query;
-  if(typeof username !== "string") {
+  if (typeof username !== "string") {
     throw new ApiError(400, "Invalid username type");
   }
   if (!username) {
@@ -203,4 +203,60 @@ export const checkAvailability = asyncHandler(async (req, res) => {
   return res.status(200).json({
     usernameAvailability: !usernameExists,
   });
+});
+
+export const forgotPaswordRequest = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (typeof email !== "string") {
+    throw new ApiError("Invalid input type");
+  }
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(200).json(new ApiResponse(200, {}, "If a user with that email exists, a reset password mail has been sent"));
+  }
+
+  const { unHashedToken, hashedToken, tokenExpiry } = user.generateTemporaryToken();
+
+  user.forgotPasswordToken = hashedToken;
+  user.forgotPasswordExpiry = tokenExpiry;
+
+  await user.save({ validateBeforeSave: false });
+
+  await sendEmail({
+    email: user.email,
+    subject: "Password reset request",
+    mailgenContent: forgotPasswordMailgenContent(user.username, `${process.env.CLIENT_URL}/reset-password/${unHashedToken}`),
+  });
+
+  return res.status(200).json(new ApiResponse(200, {}, "If a user with that email exists, a reset password mail has been sent"));
+});
+
+export const resetPassword = asyncHandler(async (req, res) => {
+  const { resetPasswordToken } = req.params;
+  const { newPassword } = req.body;
+
+  if (typeof resetPasswordToken !== "string") {
+    throw new ApiError(400, "Invalid token");
+  }
+
+  if (typeof newPassword !== "string" || newPassword.length < 8) {
+    throw new ApiError(400, "Password must be at least 8 characters");
+  }
+  let hashedToken = crypto.createHash("sha256").update(resetPasswordToken).digest("hex");
+
+  const user = await User.findOne({
+    forgotPasswordToken: hashedToken,
+    forgotPasswordExpiry: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    throw new ApiError(401, "token is invalid or expired, please retry");
+  }
+
+  user.forgotPasswordExpiry = undefined;
+  user.forgotPasswordToken = undefined;
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  return res.status(200).json(new ApiResponse(200, {}, "Password changed successfully"));
 });

@@ -31,9 +31,9 @@ app.use(cookieParser());
 app.use("/api/v1/auth", authRouter);
 
 // PROTECTED USER ROUTES
-app.use("/api/v1/users", userRouter);
+app.use("/api/v1/users", userRouter); // user dashboard protected routes
 app.use("/api/v1/uploads", uploadRouter); // for uploading/deleting to/from cloud and db
-app.use("/api/v1/pdfs", pdfRouter); 
+app.use("/api/v1/pdfs", pdfRouter); // all pdf handling related routes
 
 app.use(errorHandler);
 

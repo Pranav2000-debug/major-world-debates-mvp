@@ -13,7 +13,7 @@ const Hero = () => {
 
       <div className="relative z-10 text-white px-4">
         <h1 className="text-4xl sm:text-5xl font-extrabold mb-4">
-          Welcome to MWD
+          Welcome to Debatrium
         </h1>
         <p className="text-lg sm:text-xl mb-6">
           Engage in meaningful debates and expand your knowledge.

@@ -34,7 +34,7 @@ const router = createBrowserRouter(
       <Route element={<ProtectedRoutes />}>
         <Route path="dashboard" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />
-          <Route path="pdf/:id" element={<AiSummary/>}></Route>
+          <Route path="pdf/:id" element={<AiSummary />}></Route>
         </Route>
       </Route>
     </>
@@ -42,9 +42,7 @@ const router = createBrowserRouter(
 );
 
 createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
-  </React.StrictMode>
+  <AuthProvider>
+    <RouterProvider router={router} />
+  </AuthProvider>
 );

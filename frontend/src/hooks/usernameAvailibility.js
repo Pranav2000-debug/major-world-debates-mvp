@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import axios from "axios";
 
 const DEBOUNCE_DELAY = 2000;
@@ -10,7 +10,7 @@ export function useUsernameAvailability() {
   const debounceTimerRef = useRef(null);
   const abortControllerRef = useRef(null);
 
-  // 1️⃣ Pure API logic (no debounce)
+  // Pure API logic (no debounce)
   const checkUsernameAvailability = useCallback(async (username) => {
     // Abort previous request
     if (abortControllerRef.current) {
@@ -35,7 +35,7 @@ export function useUsernameAvailability() {
     }
   }, []);
 
-  // 2️⃣ Debounce wrapper (timing only)
+  // Debounce wrapper (timing only)
   const debouncedCheckUsername = useCallback(
     (username) => {
       if (debounceTimerRef.current) {
@@ -51,7 +51,7 @@ export function useUsernameAvailability() {
     [checkUsernameAvailability]
   );
 
-  // 3️⃣ Reset helper
+  // Reset helper
   const reset = useCallback(() => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -60,6 +60,17 @@ export function useUsernameAvailability() {
       abortControllerRef.current.abort();
     }
     setStatus(null);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, []);
 
   return {

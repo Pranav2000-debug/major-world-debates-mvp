@@ -3,7 +3,7 @@ import { asyncHandler, ApiError, ApiResponse } from "../utils/utilBarrel.js";
 import crypto from "crypto";
 import { sendEmail } from "../mail/mailgen.js";
 import { isValidEmail, isValidPassword } from "../regex/regexRules.js";
-import { emailVerificationMailgenContent, forgotPasswordMailgenContent } from "../mail/mailgencontent.js";
+import { emailVerificationMailgenContent } from "../mail/mailgencontent.js";
 
 // util func
 const generateAccessAndRefreshToken = async (userId) => {

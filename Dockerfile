@@ -37,7 +37,7 @@ COPY --from=backend-builder /app/backend /app/backend
 # Install node in final image (to run backend)
 RUN apk add --no-cache nodejs npm
 
-# Copy nginx config (we’ll add this next)
+# Copy nginx config 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80

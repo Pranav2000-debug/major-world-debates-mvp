@@ -38,7 +38,7 @@ const Navbar = () => {
     <nav className="bg-black shadow-lg p-4 w-full z-50">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <NavLink to="/" className="text-2xl font-extrabold text-white tracking-wide">
-          MWD.ai
+          Debatrium.ai
         </NavLink>
 
         {/* Desktop Links */}

@@ -78,7 +78,7 @@ export default function DashboardLayout() {
         className="
           flex-1
           overflow-y-auto
-          bg-gray-900
+         bg-neutral-950
           p-6
           pt-16 md:pt-6
         ">

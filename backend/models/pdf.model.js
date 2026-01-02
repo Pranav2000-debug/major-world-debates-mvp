@@ -43,6 +43,12 @@ const pdfSchema = new mongoose.Schema(
       enum: ["uploaded", "processing", "completed", "failed"],
       default: "uploaded",
     },
+    isConsumed: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+
     extractedText: {
       type: String,
       default: null,

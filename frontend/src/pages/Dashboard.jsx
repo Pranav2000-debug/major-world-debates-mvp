@@ -14,8 +14,6 @@ function Dashboard() {
   const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
 
-  // dev-frontend-log
-  console.log(pdfs);
   const handleCardClick = () => {
     if (!uploading) fileInputRef.current?.click();
   };
@@ -68,7 +66,6 @@ function Dashboard() {
     }
   };
 
-  // temporary state change
   const handleSubmitToAI = async (pdfId) => {
     // later change to background jobs and polls or use websocket
     // optimistic setting for now. no race conditions.
@@ -80,7 +77,7 @@ function Dashboard() {
     } catch (error) {
       // rollback on error
       setPdfs((prev) => prev.map((p) => (p._id === pdfId ? { ...p, status: "failed" } : p)));
-      toast.error(error.message)
+      toast.error(error.message);
       handleApiError(error);
     }
   };

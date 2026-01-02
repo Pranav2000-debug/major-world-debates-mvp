@@ -19,6 +19,16 @@ function AiSummary() {
     };
     fetchPdf();
   }, [id]);
+
+  // fire and forget call
+  useEffect(() => {
+    if (!id) return;
+
+    axios.patch(`http://localhost:4000/api/v1/pdfs/${id}/consume`, {}, { withCredentials: true }).catch(() => {
+      // silent failure — cleanup is best-effort
+    });
+  }, [id]);
+
   const gate = singlePdf?.aiResult?.gate;
   const analysis = singlePdf?.aiResult?.analysis;
   return (
@@ -43,6 +53,10 @@ function AiSummary() {
       {gate && gate.isDebate === false && (
         <section className="rounded-lg border border-yellow-500 bg-yellow-500/10 p-4">
           <h2 className="text-lg font-semibold mb-2 text-yellow-400">Not Suitable for Debate</h2>
+          <p className="mt-3 text-sm text-red-400">
+            This file will be automatically removed from your dashboard after you leave this page to keep things tidy.
+          </p>
+          <p className="mb-2 text-sm text-gray-400">You can view and download the PDF now if you want to keep a copy.</p>
 
           <p className="text-sm text-gray-300">{gate.reason}</p>
 
@@ -85,7 +99,11 @@ function AiSummary() {
               <div>
                 <strong className="text-white">Grammar & Clarity:</strong>
                 <ul className="list-disc list-inside mt-1">
-                  {analysis?.grammarNotes?.length ? analysis.grammarNotes.map((g, i) => <li key={i}>{g}</li>) : <li className="opacity-60">No data</li>}
+                  {analysis?.grammarNotes?.length ? (
+                    analysis.grammarNotes.map((g, i) => <li key={i}>{g}</li>)
+                  ) : (
+                    <li className="opacity-60">No data</li>
+                  )}
                 </ul>
               </div>
 

@@ -4,7 +4,9 @@ import crypto from "crypto";
 import { sendEmail } from "../mail/mailgen.js";
 import { isValidEmail, isValidPassword } from "../regex/regexRules.js";
 import { emailVerificationMailgenContent, forgotPasswordMailgenContent } from "../mail/mailgencontent.js";
-
+import jwt from "jsonwebtoken";
+import { Pdf } from "../models/pdf.model.js";
+import { v2 as cloudinary } from "cloudinary";
 // util func
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -127,10 +129,12 @@ export const login = asyncHandler(async (req, res) => {
     path: "/",
   };
 
+  const ACCESS_TOKEN_MAX_AGE = 25 * 60 * 1000; // 25 minutes
+  const REFRESH_TOKEN_MAX_AGE = 2 * 24 * 60 * 60 * 1000;
   return res
     .status(200)
-    .cookie("accessToken", accessToken, opts)
-    .cookie("refreshToken", refreshToken, opts)
+    .cookie("accessToken", accessToken, { ...opts, maxAge: ACCESS_TOKEN_MAX_AGE })
+    .cookie("refreshToken", refreshToken, { ...opts, maxAge: REFRESH_TOKEN_MAX_AGE })
     .json(new ApiResponse(200, { user: loggedInUser }, "LOGGED IN"));
 });
 
@@ -291,7 +295,6 @@ export const changePassword = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, {}, "Password updated successfully"));
 });
 
-
 export const changeUsername = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const { newUsername } = req.body;
@@ -328,4 +331,95 @@ export const changeUsername = asyncHandler(async (req, res) => {
   }
 
   return res.status(200).json(new ApiResponse(200, { user }, "Username updated successfully"));
+});
+
+export const refreshAccessToken = asyncHandler(async (req, res) => {
+  const incomingRefreshToken = req.cookies.refreshToken;
+
+  if (!incomingRefreshToken) {
+    throw new ApiError(401, "Refresh token missing");
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+  } catch (error) {
+    throw new ApiError(401, "Invalid refresh token");
+  }
+  const user = await User.findById(decoded?._id).select("+refreshToken");
+
+  // catch reuse of tokens via backend check
+  if (!user || !user.refreshToken) {
+    throw new ApiError(401, "Refresh token reuse detected");
+  }
+  if (incomingRefreshToken !== user.refreshToken) {
+    user.refreshToken = null;
+    await user.save();
+    throw new ApiError(401, "Token reuse detected. Please login again.");
+  }
+
+  // rotate tokens
+  const newAccessToken = await user.generateAccessToken();
+  const newRefreshToken = await user.generateRefreshToken();
+
+  user.refreshToken = newRefreshToken;
+  await user.save();
+
+  const opts = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  };
+  return res
+    .status(200)
+    .cookie("accessToken", newAccessToken, opts)
+    .cookie("refreshToken", newRefreshToken, opts)
+    .json(new ApiResponse(200, {}, "Token refreshed"));
+});
+
+export const deleteMyAccount = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { currentPassword } = req.body;
+
+  if (!currentPassword || typeof currentPassword !== "string") {
+    throw new ApiError(400, "Invalid Credentials");
+  }
+
+  const user = await User.findById(userId).select("+password");
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  const isPasswordCorrect = await user.matchPassword(currentPassword);
+  if (!isPasswordCorrect) throw new ApiError(400, "Inavlid Credentials");
+
+  const userPdfs = await Pdf.find({ user: userId }).select("publicId");
+
+  // BEFORE DB deletion to avoid orphaned files
+  for (const pdf of userPdfs) {
+    try {
+      await cloudinary.uploader.destroy(pdf.publicId, {
+        resource_type: "image", // stored as images
+      });
+    } catch (err) {
+      // Do not fail entire request if one delete fails
+      console.error(`Failed to delete PDF ${pdf.publicId}`, err);
+    }
+  }
+
+  await Pdf.deleteMany({ user: userId });
+  await User.findByIdAndDelete(userId);
+
+  const cookieOpts = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  };
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", cookieOpts)
+    .clearCookie("refreshToken", cookieOpts)
+    .json(new ApiResponse(200, null, "Account and all PDF data deleted successfully"));
 });

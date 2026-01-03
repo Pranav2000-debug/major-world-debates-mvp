@@ -2,10 +2,12 @@ import { useAuth } from "@/context/AuthContext";
 import React, { useState } from "react";
 import ChangePasswordModal from "@/components/ChangePasswordModal";
 import ChangeUsernameModal from "@/components/ChangeUsernameModal";
+import DeleteAccountModal from "@/components/DeleteAccountModal";
 
 const Profile = () => {
   const [showPasswordModal, setShowPasswordModal] = useState();
   const [showUsernameModal, setShowUsernameModal] = useState(false);
+  const [showdeleteAccountModal, setShowDeleteAccoundtModal] = useState(false);
   const { user } = useAuth();
   const capitalizeName = (name = "") =>
     name
@@ -46,7 +48,9 @@ const Profile = () => {
 
           <div className="flex flex-col sm:flex-row gap-4">
             <button
-              onClick={() => {setShowUsernameModal(true)}}
+              onClick={() => {
+                setShowUsernameModal(true);
+              }}
               className="flex-1 bg-yellow-400 text-black font-semibold py-3 px-6 rounded-lg hover:bg-yellow-300 transition duration-200">
               Change Username
             </button>
@@ -58,10 +62,18 @@ const Profile = () => {
               className="flex-1 bg-yellow-400 text-black font-semibold py-3 px-6 rounded-lg hover:bg-yellow-300 transition duration-200">
               Reset Password
             </button>
+            <button
+              onClick={() => {
+                setShowDeleteAccoundtModal(true);
+              }}
+              className="flex-1 bg-red-500 text-black font-semibold py-3 px-6 rounded-lg hover:bg-red-400 transition duration-200">
+              Delete Account
+            </button>
           </div>
         </div>
         <ChangePasswordModal isOpen={showPasswordModal} onClose={() => setShowPasswordModal(false)} />
         <ChangeUsernameModal isOpen={showUsernameModal} onClose={() => setShowUsernameModal(false)} />
+        <DeleteAccountModal isOpen={showdeleteAccountModal} onClose={() => setShowDeleteAccoundtModal(false)} />
       </div>
     </div>
   );

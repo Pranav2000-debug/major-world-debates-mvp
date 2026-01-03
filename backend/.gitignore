@@ -20,3 +20,4 @@ build/
 
 # Optional: VSCode settings
 .vscode/
+services/ai/prompts

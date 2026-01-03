@@ -81,7 +81,7 @@ userSchema.methods.generateAccessToken = async function () {
       username: this.username,
     },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: "2h" }
+    { expiresIn: "20m" }
   );
   return accessToken;
 };
@@ -94,7 +94,7 @@ userSchema.methods.generateRefreshToken = async function () {
       username: this.username,
     },
     process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: "7d" }
+    { expiresIn: "2d" }
   );
   return refreshToken;
 };

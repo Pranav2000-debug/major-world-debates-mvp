@@ -1,5 +1,5 @@
 import express from "express";
-import { signup, login, logout, checkAvailability, verifyEmail, forgotPaswordRequest, resetPassword } from "../controllers/userController.js";
+import { signup, login, logout, checkAvailability, verifyEmail, forgotPaswordRequest, resetPassword, refreshAccessToken } from "../controllers/userController.js";
 import { verifyJwt } from "../middleware/authMiddleware.js";
 import { forgotPasswordLimiter, loginLimiter, signupLimiter, usernameCheckLimiter, verifyEmailLimiter } from "../middleware/rateLimiter.js";
 
@@ -14,6 +14,9 @@ authRouter.get("/check-availability", usernameCheckLimiter, checkAvailability);
 // user auth password related routes
 authRouter.post("/forgot-password", forgotPasswordLimiter, forgotPaswordRequest )
 authRouter.post("/reset-password/:resetPasswordToken", resetPassword);
+
+// public verification for refreshing of token
+authRouter.post("/refres-token", refreshAccessToken);
 
 
 // protected routes

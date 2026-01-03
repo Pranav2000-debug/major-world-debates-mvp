@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import axios from "axios";
+import api from "@/api/axios";
 import UploadCard from "../components/Dashboard/UploadCard";
 import PdfCard from "../components/Dashboard/PdfCard";
 import { handleApiError } from "@/utils/handleApiError";
@@ -37,7 +37,7 @@ function Dashboard() {
       setUploading(true);
       const formData = new FormData();
       formData.append("file", file);
-      const res = await axios.post("http://localhost:4000/api/v1/uploads/pdf", formData, { withCredentials: true });
+      const res = await api.post("/uploads/pdf", formData);
       const uploadData = res?.data?.data?.pdf;
       if (!uploadData) throw new Error("Invalid upload response");
       setPdfs((prev) => [...prev, uploadData]);

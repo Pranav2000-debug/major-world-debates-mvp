@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import axios from "axios";
+import api from "@/api/axios";
 
 const DEBOUNCE_DELAY = 2000;
 
@@ -10,7 +10,6 @@ export function useUsernameAvailability() {
   const debounceTimerRef = useRef(null);
   const abortControllerRef = useRef(null);
 
-  // Pure API logic (no debounce)
   const checkUsernameAvailability = useCallback(async (username) => {
     // Abort previous request
     if (abortControllerRef.current) {
@@ -21,7 +20,7 @@ export function useUsernameAvailability() {
     abortControllerRef.current = controller;
 
     try {
-      const res = await axios.get("http://localhost:4000/api/v1/auth/check-availability", {
+      const res = await api.get("/auth/check-availability", {
         params: { username },
         signal: controller.signal,
       });

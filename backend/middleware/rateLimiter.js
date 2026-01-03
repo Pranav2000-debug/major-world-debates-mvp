@@ -99,3 +99,33 @@ export const updateUsernameLimiter = rateLimit({
     });
   },
 });
+
+
+export const uploadPdfLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 mins
+  max: 4, // 4 files
+  standardHeaders: true,
+  legacyHeaders: false,
+   handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Too file uploads. Please try again later.",
+      code: "RATE_LIMITED",
+    });
+  },
+})
+
+// AGGRESSIVE LIMIT
+export const submitPdfToAILimit = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 min
+  max: 2, // 2 submissions
+  standardHeaders: true,
+  legacyHeaders: false,
+   handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Too file uploads. Please try again later.",
+      code: "RATE_LIMITED",
+    });
+  },
+})

@@ -1,50 +1,19 @@
 import { ApiError } from "../../utils/ApiError.js";
 import { GoogleGenAI } from "@google/genai";
+import { loadPrompt } from "./utils/loadPrompt.js";
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
 export async function analyzeDebateSutaibility({ text }) {
-  // todo
+  const basePrompt = loadPrompt("debateAnalysis.prompt.txt");
+  const finalPrompt = basePrompt.replace("{{TEXT}}", text);
+
   try {
     if (!text || !text.trim()) throw new ApiError(400, "Empty text provided for debate analysis");
 
     const response = await genAI.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: ` You are a strict debate suitability classifier.
-     Your task:
-     Determine whether the given document is suitable for a formal debate.
- 
- A document is debate-suitable ONLY if:
- - It presents a clear controversial issue
- - There are at least two opposing viewpoints (explicit or implicit)
- - The issue can reasonably be argued from multiple sides
- 
- If the document is NOT debate-suitable:
- - Set isDebate to false
- - Provide a short reason
- - Do NOT invent arguments
- - Do NOT summarize the document
- 
- If the document IS debate-suitable:
- - Set isDebate to true
- - Identify the main debate topic concisely
- 
- Output rules:
- - Return STRICT JSON only
- - Follow the exact schema
- - Do NOT include markdown
- - Do NOT include extra keys
- 
- JSON schema:
- {
-   "isDebate": boolean,
-   "confidence": number,
-   "reason": string,
-   "detectedTopic": string | null
- }
- 
- Document content:
- """${text}"""
- `,
+      contents: finalPrompt,
       config: {
         thinkingConfig: {
           thinkingBudget: -1, // disabling chain of thought

@@ -1,5 +1,5 @@
 import { User } from "../models/User.js";
-import {asyncHandler, ApiError} from "../utils/utilBarrel.js"
+import { asyncHandler, ApiError } from "../utils/utilBarrel.js";
 import jwt from "jsonwebtoken";
 
 export const verifyJwt = asyncHandler(async (req, res, next) => {
@@ -19,6 +19,11 @@ export const verifyJwt = asyncHandler(async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      throw new ApiError(401, "ACCESS_TOKEN_EXPIRED", {
+        code: "ACCESS_TOKEN_EXPIRED",
+      });
+    }
     throw new ApiError(401, "Invalid Access Token");
   }
 });

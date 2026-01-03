@@ -260,3 +260,72 @@ export const resetPassword = asyncHandler(async (req, res) => {
 
   return res.status(200).json(new ApiResponse(200, {}, "Password changed successfully"));
 });
+
+export const changePassword = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { currentPassword, newPassword } = req.body;
+
+  if (typeof currentPassword !== "string" || typeof newPassword !== "string") {
+    throw new ApiError(400, "Invalid input");
+  }
+
+  if (!isValidPassword(newPassword)) {
+    throw new ApiError(400, "Password must be at least 8 characters and include uppercase, lowercase, and a special character");
+  }
+
+  const user = await User.findById(userId).select("+password");
+
+  if (!user) {
+    throw new ApiError(401, "Unauthorized");
+  }
+
+  const isMatch = await user.matchPassword(currentPassword);
+
+  if (!isMatch) {
+    throw new ApiError(400, "Current password is incorrect");
+  }
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  return res.status(200).json(new ApiResponse(200, {}, "Password updated successfully"));
+});
+
+
+export const changeUsername = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { newUsername } = req.body;
+
+  if (typeof newUsername !== "string") {
+    throw new ApiError(400, "Invalid input");
+  }
+
+  const trimmedUsername = newUsername.trim().toLowerCase();
+
+  if (trimmedUsername.length < 4) {
+    throw new ApiError(400, "Username must be at least 3 characters long");
+  }
+
+  const usernameRegex = /^[a-z0-9_]+$/;
+  if (!usernameRegex.test(trimmedUsername)) {
+    throw new ApiError(400, "Username can only contain lowercase letters, numbers, and underscores");
+  }
+
+  // Check availability
+  const existingUser = await User.findOne({
+    username: trimmedUsername,
+    _id: { $ne: userId },
+  });
+
+  if (existingUser) {
+    throw new ApiError(409, "Username is already taken");
+  }
+
+  const user = await User.findByIdAndUpdate(userId, { username: trimmedUsername }, { new: true }).select("-password -refreshToken");
+
+  if (!user) {
+    throw new ApiError(401, "Unauthorized");
+  }
+
+  return res.status(200).json(new ApiResponse(200, { user }, "Username updated successfully"));
+});

@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { useAuth } from "./context/AuthContext";
 import { LoaderTwo } from "./components/ui/loader";
+import { Toaster } from "react-hot-toast";
 
 const Layout = () => {
   const { loading } = useAuth();
@@ -16,6 +17,7 @@ const Layout = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+      <Toaster />
       {/* Navbar */}
       <Navbar />
 

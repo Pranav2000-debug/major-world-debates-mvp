@@ -3,7 +3,7 @@ import axios from "axios";
 import UploadCard from "../components/Dashboard/UploadCard";
 import PdfCard from "../components/Dashboard/PdfCard";
 import { handleApiError } from "@/utils/handleApiError";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { useMyPdfs } from "../hooks/useMyPdfs";
 import { useNavigate } from "react-router-dom";
 import { LoaderFive } from "@/components/ui/loader";
@@ -74,6 +74,7 @@ function Dashboard() {
       const AIRes = await axios.post(`http://localhost:4000/api/v1/pdfs/${pdfId}/submit`, {}, { withCredentials: true });
       const updatedPdf = AIRes?.data?.data?.pdf;
       setPdfs((prev) => prev.map((p) => (p._id === updatedPdf._id ? updatedPdf : p)));
+      toast.success("AI Debate generated");
     } catch (error) {
       // rollback on error
       setPdfs((prev) => prev.map((p) => (p._id === pdfId ? { ...p, status: "failed" } : p)));
@@ -88,42 +89,6 @@ function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <Toaster
-        position="top-center"
-        reverseOrder={false}
-        gutter={8}
-        containerClassName=""
-        containerStyle={{}}
-        toasterId="default"
-        toastOptions={{
-          className: "",
-          duration: 5000,
-          removeDelay: 1000,
-          style: {
-            background: "#363636",
-            color: "#FBBF24",
-          },
-          success: {
-            duration: 3000,
-            style: {
-              color: "#FBBF24",
-            },
-            iconTheme: {
-              primary: "#16A34A",
-              secondary: "#363636",
-            },
-          },
-          error: {
-            style: {
-              color: "#FBBF24",
-            },
-            iconTheme: {
-              primary: "#DC2626",
-              secondary: "#363636",
-            },
-          },
-        }}
-      />
 
       <div>
         <h1 className="text-2xl font-semibold text-white">Uploads</h1>

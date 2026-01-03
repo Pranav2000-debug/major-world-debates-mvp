@@ -11,12 +11,12 @@ export default function PdfCard({ pdf, onSubmit, onDelete, onDetails }) {
       )}
 
       {/* PREVIEW */}
-      <div className="relative h-48 bg-neutral-800">
+      <div className="relative h-48 bg-neutral-800 touch-manipulation">
         <img src={pdf.previewImageUrl} alt={pdf.originalName} className="h-full w-full object-cover" />
 
         {/* HOVER ACTIONS (ONLY WHEN NOT PROCESSING) */}
         {pdf.status !== "processing" && (
-          <div className="absolute inset-0 flex items-center justify-center gap-3 bg-black/60 opacity-0 group-hover:opacity-100 transition">
+          <div className=" absolute inset-0 flex items-center justify-center gap-3 bg-black/60 transition opacity-100 pointer-events-auto lg:opacity-0 lg:pointer-events-none lg:group-hover:opacity-100 lg:group-hover:pointer-events-auto">
             {/* PRIMARY ACTION */}
             {pdf.status === "uploaded" && (
               <button
@@ -27,26 +27,32 @@ export default function PdfCard({ pdf, onSubmit, onDelete, onDetails }) {
             )}
 
             {pdf.status === "completed" && (
-              <button onClick={onDetails} className="rounded-md bg-slate-800/80 text-slate-200 border border-slate-700/60 transition-all duration-200 px-3 py-1.5 text-sm font-medium hover:bg-amber-400/90">
+              <button
+                onClick={onDetails}
+                className="rounded-md bg-slate-800/80 text-slate-200 border border-slate-700/60 transition-all duration-200 px-3 py-1.5 text-sm font-medium hover:bg-amber-400/90">
                 Details
               </button>
             )}
 
             {pdf.status === "failed" && (
-              <button onClick={onSubmit} className="rounded-md bg-slate-800/80 text-slate-200 border border-slate-700/60 transition-all duration-200 px-3 py-1.5 text-sm font-medium hover:border-slate-600">
+              <button
+                onClick={onSubmit}
+                className="rounded-md bg-slate-800/80 text-slate-200 border border-slate-700/60 transition-all duration-200 px-3 py-1.5 text-sm font-medium hover:border-slate-600">
                 Retry
               </button>
             )}
 
             {/* DELETE */}
-            <button onClick={onDelete} className="rounded-md bg-slate-800/80 text-slate-200 border border-slate-700/60 transition-all duration-200 px-3 py-1.5 text-sm font-medium hover:bg-red-500/80 hover:text-white hover:border-red-500/50">
+            <button
+              onClick={onDelete}
+              className="rounded-md bg-slate-800/80 text-slate-200 border border-slate-700/60 transition-all duration-200 px-3 py-1.5 text-sm font-medium hover:bg-red-500/80 hover:text-white hover:border-red-500/50">
               Delete
             </button>
           </div>
         )}
       </div>
 
-      {/* ===== METADATA ===== */}
+      {/* METADATA */}
       <div className="p-3 space-y-1">
         <p className="text-sm font-medium text-white truncate">{pdf.originalName}</p>
 

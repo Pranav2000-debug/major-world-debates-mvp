@@ -46,7 +46,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
         </button>
 
         <h3 className="text-2xl font-bold text-white mb-2">Reset your password</h3>
-        <p className="text-gray-400 text-sm mb-4">Enter your email and we'll send you a reset link.</p>
+        <p className="text-gray-400 text-sm mb-4">Enter your email and well send you a reset link.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input

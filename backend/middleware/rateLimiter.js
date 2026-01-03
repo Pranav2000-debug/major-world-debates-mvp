@@ -85,3 +85,17 @@ export const forgotPasswordLimiter = rateLimit({
     });
   },
 });
+
+export const updateUsernameLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 3, // very safe for prod
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many username change attempts. Please try again later.",
+      code: "RATE_LIMITED",
+    });
+  },
+});

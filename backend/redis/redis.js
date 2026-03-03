@@ -25,12 +25,18 @@ export default class RedisClient extends EventEmitter {
 
     // Track if this is initial connect vs reconnect
     let isFirstConnect = true;
+    let hasLoggedError = false;
+    let hasLoggedClose = false;
 
     this.#sharedWorkerClient.on("connect", () => {
       console.log(`Redis worker client connected to ${REDIS_HOST}:${REDIS_PORT}`);
     });
     this.#sharedWorkerClient.on("ready", () => {
       console.log("Redis worker client ready");
+
+      // Reset error/close flags on successful connection so future issues are logged
+      hasLoggedError = false;
+      hasLoggedClose = false;
 
       // On reconnect (not first connect), emit event for recovery
       if (!isFirstConnect) {
@@ -40,10 +46,16 @@ export default class RedisClient extends EventEmitter {
       isFirstConnect = false;
     });
     this.#sharedWorkerClient.on("error", (err) => {
-      console.error("x Redis error:", err.message);
+      if (!hasLoggedError) {
+        console.error("x Redis error:", err.message);
+        hasLoggedError = true;
+      }
     });
     this.#sharedWorkerClient.on("close", () => {
-      console.log("Redis connection closed");
+      if (!hasLoggedClose) {
+        console.log("Redis connection closed");
+        hasLoggedClose = true;
+      }
     });
   }
 

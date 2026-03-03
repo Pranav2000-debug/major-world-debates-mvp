@@ -265,8 +265,17 @@ pdfPreprocessWorker.on("progress", (job, progress) => {
   console.log(`Job ${job.id} progress: ${progress}%`);
 });
 
+let hasLoggedWorkerError = false;
 pdfPreprocessWorker.on("error", (err) => {
-  console.error("Worker error:", err.message);
+  if (!hasLoggedWorkerError) {
+    console.error("Worker error:", err.message);
+    hasLoggedWorkerError = true;
+  }
+});
+
+// Reset flag when worker successfully picks up a job (Redis is back)
+pdfPreprocessWorker.on("active", () => {
+  hasLoggedWorkerError = false;
 });
 
 console.log("PDF preprocessing worker started");
